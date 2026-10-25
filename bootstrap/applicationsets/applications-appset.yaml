@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: business-applications
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: 'https://github.com/traipoap/argocd-bootstrap'
+        revision: HEAD
+        directories:
+          - path: apps/*/overlays/*
+  template:
+    metadata:
+      name: '{{path[1]}}-{{path[3]}}' # ผลลัพธ์: my-app-production
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/traipoap/argocd-bootstrap'
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{path[1]}}-{{path[3]}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  # Frontend configuration
+  ALLOWED_HOSTS: "app.codezap.win,.codezap.win"
+  API_PROXY_TARGET: "http://backend-svc:8080"
+
+  # Backend configuration
+  BACKEND_PORT: "8080"
+  CORS_ORIGINS: "https://app.codezap.win"
+  QUICKWIT_URL: "http://quickwit-searcher.logging.svc.cluster.local:7280"
+
+  # Database configuration
+  DATABASE_PATH: "backend/data/users.db"

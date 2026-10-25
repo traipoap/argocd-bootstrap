@@ -1,0 +1,15 @@
+dependencies:
+- name: alertmanager
+  repository: oci://ghcr.io/prometheus-community/charts
+  version: 2.1.2
+- name: kube-state-metrics
+  repository: oci://ghcr.io/prometheus-community/charts
+  version: 8.7.0
+- name: prometheus-node-exporter
+  repository: oci://ghcr.io/prometheus-community/charts
+  version: 4.60.0
+- name: prometheus-pushgateway
+  repository: oci://ghcr.io/prometheus-community/charts
+  version: 3.9.1
+digest: sha256:c44b1a095971fc6e77b725212a12e3b42c4d77cef8926bbc8fcacddc969b5144
+generated: "2026-10-24T10:41:11.848649214Z"
