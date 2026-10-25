@@ -9,7 +9,7 @@ spec:
         repoURL: 'https://github.com/traipoap/argocd-bootstrap'
         revision: HEAD
         directories:
-          - path: clusters/production/system/*
+          - path: clusters/staging/system/*
   template:
     metadata:
       name: 'infra-{{path.basename}}'
