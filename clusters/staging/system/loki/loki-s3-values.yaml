@@ -1,0 +1,126 @@
+# loki.yaml
+# Deployment mode
+deploymentMode: Monolithic
+
+# Single binary configuration for simplicity
+singleBinary:
+  enabled: true
+  replicas: 1
+
+  # Resource allocation for non-production
+  resources:
+    limits:
+      cpu: 256m
+      memory: 256Mi
+    requests:
+      cpu: 128m
+      memory: 128Mi
+
+  # Persistence for logs
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""  # uses default storage class
+
+# Loki configuration
+loki:
+  auth_enabled: false
+
+  commonConfig:
+    replication_factor: 1
+
+  storage:
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+  structuredConfig:
+    storage_config:
+      named_stores:
+        aws:
+          s3-loki-chunks:
+            endpoint: '10.10.16.4:3900'
+            bucketnames: chunks
+            region: garage
+            access_key_id: 'YOUR_GARAGE_ACCESS_KEY_ID'
+            secret_access_key: 'YOUR_GARAGE_SECRET_ACCESS_KEY'
+            s3forcepathstyle: true
+            insecure: true
+
+    schema_config:
+      configs:
+        - from: "2026-05-01"
+          store: tsdb
+          object_store: s3-loki-chunks
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+
+  # Limits configuration
+  limits_config:
+    retention_period: 72h  # 7 days retention
+    max_query_series: 1000
+    max_query_parallelism: 4
+    ingestion_rate_mb: 5
+    ingestion_burst_size_mb: 10
+    per_stream_rate_limit: 5MB
+    per_stream_rate_limit_burst: 10MB
+
+  # Compactor for log retention
+  compactor:
+    retention_enabled: true
+    delete_request_store: filesystem
+    retention_delete_delay: 2h
+    retention_delete_worker_count: 16
+
+# Service configuration - NodePort for ALB integration
+service:
+  type: NodePort
+  port: 3100
+  nodePort: 30100
+
+# Gateway configuration (nginx)
+gateway:
+  enabled: false
+  replicas: 1
+
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30101
+
+  resources:
+    limits:
+      cpu: 128m
+      memory: 128Mi
+    requests:
+      cpu: 64m
+      memory: 64Mi
+
+# Monitoring configuration
+monitoring:
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false
+
+  lokiCanary:
+    enabled: false
+
+# Test configuration
+test:
+  enabled: false
+
+# Backend configuration (not needed for single binary)
+backend:
+  replicas: 0
+read:
+  replicas: 0
+write:
+  replicas: 0
+
+# Disable memory-intensive caching for 4GB node
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false

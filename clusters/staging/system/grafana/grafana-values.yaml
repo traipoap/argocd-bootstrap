@@ -1,0 +1,87 @@
+# grafana.yaml
+service:
+  type: NodePort
+  nodePort: 30085
+
+resources:
+ limits:
+   cpu: 512m
+   memory: 512Mi
+ requests:
+   cpu: 1m
+   memory: 1Mi
+
+# Enable Persistent Storage
+persistence:
+  enabled: true
+  type: pvc
+  size: 2Gi
+
+initChownData:
+  enabled: false
+
+podSecurityContext:
+  fsGroup: 472
+  runAsGroup: 472
+  runAsUser: 472
+
+containerSecurityContext:
+  runAsUser: 472
+  runAsGroup: 472
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false # Required for some Grafana operations if not fully tuned
+
+# Admin configuration
+adminUser: admin
+## It is recommended to change this on install via --set or secret, but defaults:
+# adminPassword: strongpassword
+# Provision Prometheus Datasource automatically
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server.logging.svc.cluster.local  # Adjust namespace if different
+      access: proxy
+      isDefault: true
+    - name: Loki
+      type: loki
+      url: http://loki.logging.svc.cluster.local:3100
+      access: proxy
+# Dashboard Providers - load dashboards from sidecars or files
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+# Provision Dashboards
+## We will load a popular Node Exporter dashboard (ID: 1860) and a Kubernetes Pods dashboard
+dashboards:
+  default:
+    node-exporter-full:
+      gnetId: 1860  # Node Exporter Full
+      revision: 37
+      datasource: Prometheus
+    kubernetes-pods:
+      gnetId: 6417  # Kubernetes Pods
+      revision: 1
+      datasource: Prometheus
+# Security & Tweaks
+grafana.ini:
+  server:
+    protocol: http
+    domain: grafana.traipoap.com
+    root_url: http://grafana.traipoap.com/ # replace with your domain
+  security:
+    allow_embedding: true
+    cookie_samesite: lax
+  auth.anonymous:
+    enabled: false  # Disable anonymous access for security

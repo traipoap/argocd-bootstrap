@@ -1,0 +1,307 @@
+# argocd-bootstrap — self-hosted DevOps platform
+#
+# Services:
+#   - nginx-manager : Nginx Proxy Manager (reverse proxy, web UI on :81)
+#   - gitlab        : GitLab Omnibus (Git + CI server)
+#   - gitlab-runner : GitLab CI/CD runner (docker executor)
+#   - vaultwarden   : self-hosted password manager
+#   - etcd          : external ETCD (e.g. for ArgoCD)
+#   - etcd-backup   : periodic ETCD snapshot backups
+#   - grafana       : dashboards / observability
+#   - jenkins       : CI/CD
+#   - portainer     : Docker management web UI
+#   - rancher       : Kubernetes cluster management
+#
+# Setup:
+#   cp .env.example .env   # then edit the secrets
+#   docker compose up -d
+#   docker compose logs -f
+
+name: argocd-bootstrap
+
+networks:
+  argocd-net:
+    driver: bridge
+
+volumes:
+  gitlab-data:
+  gitlab-runner-data:
+  vaultwarden-data:
+  etcd-data:
+  etcd-backups:
+  grafana-data:
+  jenkins-data:
+  npm-etc-nginx:
+  npm-www:
+  npm-certs:
+  portainer-data:
+  rancher-data:
+
+services:
+  # ---------------------------------------------------------------------------
+  # Nginx Proxy Manager (reverse proxy + certificate manager, UI on :81)
+  # Owns host ports 80/443; add proxy hosts in the UI pointing at:
+  #   gitlab:80, vaultwarden:80, grafana:3000, jenkins:8080
+  # ---------------------------------------------------------------------------
+  nginx-manager:
+    image: nginxproxymanager/nginxproxymanager:2.10.7
+    container_name: nginx-manager
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "${NPM_UI_PORT:-81}:81"  # admin UI
+    environment:
+      NPM_EMAIL: "${NPM_EMAIL:-admin@example.com}"
+      NPM_PASS: "${NPM_PASS:-changeme-npm-admin}"
+      NPM_DEBUG: "false"
+    volumes:
+      - npm-etc-nginx:/etc/nginx
+      - npm-www:/usr/share/nginx/html
+      - npm-certs:/etc/nginx/certs
+    depends_on:
+      - gitlab
+      - vaultwarden
+      - grafana
+      - jenkins
+    healthcheck:
+      test: ["CMD-SHELL", "node /app/scripts/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # GitLab (CI server) + Runner
+  # ---------------------------------------------------------------------------
+  gitlab:
+    image: gitlab/gitlab-ce:17.7.2-ce.0
+    container_name: gitlab
+    hostname: gitlab
+    restart: unless-stopped
+    shm_size: "256m"
+    ports:
+      - "${GITLAB_SSH_PORT:-2222}:22"
+      # 80/443 are owned by nginx-manager; this is a direct bootstrap port
+      # (e.g. http://localhost:8081) — remove once routed through nginx-manager
+      - "${GITLAB_DIRECT_PORT:-8081}:80"
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${GITLAB_EXTERNAL_URL:-http://localhost}'
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
+        gitlab_rails['initial_root_password'] = '${GITLAB_ROOT_PASSWORD}'
+        # Enable GitLab CI
+        gitlab_ci['manage_ci'] = true
+        # Sensible tuning for a modest VM
+        puma['worker_processes'] = 2
+        sidekiq['max_concurrency'] = 25
+    volumes:
+      - gitlab-data:/var/opt/gitlab
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost/-/readiness", "-I"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+    networks:
+      - argocd-net
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine-v17.4.0
+    container_name: gitlab-runner
+    restart: unless-stopped
+    depends_on:
+      gitlab:
+        condition: service_healthy
+    environment:
+      REGISTER_TOKEN: "${GITLAB_RUNNER_REGISTER_TOKEN}"
+      REGISTER_URL: "${GITLAB_EXTERNAL_URL:-http://gitlab}"
+      REGISTER_RUNNER_NAME: "docker-runner"
+    volumes:
+      - gitlab-runner-data:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock  # docker executor
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /etc/gitlab-runner/config.toml ]; then
+          gitlab-runner register --non-interactive
+        fi
+        exec /usr/bin/dentrypoint gitlab-runner run
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # Vaultwarden (password manager)
+  # ---------------------------------------------------------------------------
+  vaultwarden:
+    image: vaultwarden/server:1.32.0
+    container_name: vaultwarden
+    restart: unless-stopped
+    ports:
+      - "${VAULTWARDEN_PORT:-8090}:80"
+    environment:
+      SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS_ALLOWED:-true}"
+      ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN:-changeme-admin-token}"
+      DOMAIN: "${VAULTWARDEN_DOMAIN:-http://localhost:8090}"
+    volumes:
+      - vaultwarden-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/alive"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # External ETCD (for ArgoCD or other etcd-backed systems)
+  # ---------------------------------------------------------------------------
+  etcd:
+    image: bitnami/etcd:3.5.15
+    container_name: etcd
+    restart: unless-stopped
+    ports:
+      - "${ETCD_CLIENT_PORT:-2379}:2379"
+      - "${ETCD_PEER_PORT:-2380}:2380"
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+      ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380"
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: "http://etcd:2380"
+      ETCD_INITIAL_CLUSTER: "default=http://etcd:2380"
+      ETCD_NAME: "default"
+    volumes:
+      - etcd-data:/bitnami/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - argocd-net
+
+  etcd-backup:
+    image: bitnami/etcd:3.5.15
+    container_name: etcd-backup
+    restart: unless-stopped
+    depends_on:
+      etcd:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/scripts/etcd-backup.sh"]
+    environment:
+      ETCDCTL_ENDPOINTS: "http://etcd:2379"
+      BACKUP_INTERVAL: "${ETCD_BACKUP_INTERVAL:-3600}"
+      KEEP_BACKUPS: "${ETCD_KEEP_BACKUPS:-24}"
+    volumes:
+      - etcd-backups:/backups
+      - ./scripts/etcd-backup.sh:/scripts/etcd-backup.sh:ro
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # Grafana
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # Jenkins
+  # ---------------------------------------------------------------------------
+  jenkins:
+    image: jenkins/jenkins:2.462.3-lts-jdk17
+    container_name: jenkins
+    restart: unless-stopped
+    ports:
+      - "${JENKINS_PORT:-9080}:8080"
+      - "50000:50000"  # jnlp agent port
+    environment:
+      JENKINS_HOME: /var/jenkins_home
+      JENKINS_OPTS: "--httpPort=8080 --host=0.0.0.0"
+      TZ: "${TZ:-UTC}"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock  # docker build jobs
+      - /tmp:/tmp:rw
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsk http://localhost:8080/login || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # Portainer (Docker management web UI)
+  # ---------------------------------------------------------------------------
+  portainer:
+    image: portainer/portainer-ce:2.21.2
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "${PORTAINER_UI_PORT:-9443}:9443"  # web UI (HTTPS)
+      - "${PORTAINER_AGENT_PORT:-9000}:9000"  # portainer agent (optional)
+    volumes:
+      - portainer-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock  # manage local Docker
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "https://127.0.0.1:9443/p/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - argocd-net
+
+  # ---------------------------------------------------------------------------
+  # Rancher (Kubernetes cluster management)
+  # Note: Rancher wants valid TLS on 443; it ships a self-signed cert by
+  # default which is fine for testing. For production, put it behind
+  # nginx-manager with a real certificate (SNI) or mount your own cert.
+  # ---------------------------------------------------------------------------
+  rancher:
+    image: rancher/rancher:v2.8.4
+    container_name: rancher
+    restart: unless-stopped
+    ports:
+      - "${RANCHER_HTTPS_PORT:-9444}:443"
+    environment:
+      CATTLE_BOOTSTRAP_PASSWORD: "${RANCHER_BOOTSTRAP_PASSWORD:-changeme-rancher}"
+      CATTLE_CLUSTER_ID: "${RANCHER_CLUSTER_ID:-local}"
+    volumes:
+      - rancher-data:/var/lib/rancher
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsk https://127.0.0.1:443/ping -o /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - argocd-net
