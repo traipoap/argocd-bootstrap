@@ -8,5 +8,4 @@ else
     echo "Current value of KUBECONFIG --> [${KUBECONFIG}]"
 fi
 
-helm dependency update
-helm upgrade argocd argo/argo-cd -f argocd-values-staging.yaml -n argocd
+helm install argocd argo/argo-cd -f argocd-values-staging.yaml -n argocd --create-namespace
