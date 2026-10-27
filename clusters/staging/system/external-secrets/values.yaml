@@ -974,17 +974,7 @@ certController:
     failureThreshold: 30
 
     ## -- Extra environment variables to add to container.
-  extraEnv:
-    - name: AWS_ACCESS_KEY_ID
-      valueFrom:
-        secretKeyRef:
-          name: awssm-secret
-          key: KEYID
-    - name: AWS_SECRET_ACCESS_KEY
-      valueFrom:
-        secretKeyRef:
-          name: awssm-secret
-          key: SECRETKEY
+  extraEnv: []
 
     ## -- Map of extra arguments to pass to container.
   extraArgs: {}
