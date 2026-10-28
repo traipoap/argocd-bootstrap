@@ -50,7 +50,7 @@ spec:
       namespaces:
         from: "All"
 
-  - name: http-app
+  - name: http-argocd
     protocol: HTTP
     port: 80
     hostname: "argocd.traipoap.com"
