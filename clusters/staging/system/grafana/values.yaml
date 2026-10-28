@@ -42,12 +42,12 @@ datasources:
     datasources:
     - name: Prometheus
       type: prometheus
-      url: http://prometheus-server.logging.svc.cluster.local  # Adjust namespace if different
+      url: http://infra-prometheus-server.prometheus.svc.cluster.local  # Adjust namespace if different
       access: proxy
       isDefault: true
     - name: Loki
       type: loki
-      url: http://loki.logging.svc.cluster.local:3100
+      url: http://infra-loki.loki.svc.cluster.local:3100
       access: proxy
 # Dashboard Providers - load dashboards from sidecars or files
 dashboardProviders:
