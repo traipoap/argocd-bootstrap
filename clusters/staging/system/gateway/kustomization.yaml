@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - gateway.yaml
   - grafana-httproute.yaml
+  - argocd-httproute.yaml
