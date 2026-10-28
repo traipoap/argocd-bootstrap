@@ -51,7 +51,7 @@ spec:
         from: "All"
 
   - name: http-argocd
-    protocol: TCP
+    protocol: HTTPS
     port: 443
     hostname: "argocd.traipoap.com"
     allowedRoutes:
