@@ -34,7 +34,7 @@ presets:
     includeCollectorLogs: false
     # -- Enabling this writes checkpoints in /var/lib/otelcol/ host directory.
     # Note this changes collector's user to root, so that it can write to host directory.
-    storeCheckpoints: false
+    storeCheckpoints: true
     # -- The maximum bytes size of the recombined field.
     # Once the size exceeds the limit, all received entries of the source will be combined and flushed.
     maxRecombineLogSize: 102400
@@ -264,7 +264,7 @@ config:
       extract:
         metadata:
           - k8s.pod.name
-          - k8s.pod.uid
+          # - k8s.pod.uid  # commented out to prevent cardinality explosion in Loki
           - k8s.namespace.name
           - k8s.node.name
           - k8s.container.name
