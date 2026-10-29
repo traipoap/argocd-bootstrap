@@ -219,6 +219,20 @@ rewriteDeprecatedComponentNames: true
 config:
   exporters:
     debug: {}
+    # Loki exporter for logs
+    otlp_http/loki:
+      endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
+      tls:
+        insecure: true
+      # Optimization for cross-region or network latency
+      sending_queue:
+        enabled: true
+        queue_size: 5000
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_elapsed_time: 300s
+
   extensions:
     # The health_check extension is mandatory for this chart.
     # Without the health_check extension the collector will fail the readiness and liveness probes.
@@ -235,6 +249,63 @@ config:
       limit_percentage: 80
       # By default spike_limit_mib is set to 25% of ".Values.resources.limits.memory"
       spike_limit_percentage: 25
+
+    # Resource detection for Kubernetes
+    resourcedetection:
+      detectors: [env, system]
+      timeout: 5s
+
+    # Enrich logs/metrics with Kubernetes metadata
+    k8s_attributes:
+      auth_type: "serviceAccount"
+      passthrough: false
+      filter:
+        node_from_env_var: OTEL_K8S_NODE_NAME
+      extract:
+        metadata:
+          - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.container.name
+        labels:
+          - tag_name: app
+            key: app
+      pod_association:
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.name
+            - from: resource_attribute
+              name: k8s.namespace.name
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.ip
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.uid
+        - sources:
+            - from: connection
+
+    # Resource processor to create user-friendly labels for Loki
+    resource:
+      attributes:
+        - key: namespace
+          from_attribute: k8s.namespace.name
+          action: insert
+        - key: pod
+          from_attribute: k8s.pod.name
+          action: insert
+        - key: container
+          from_attribute: k8s.container.name
+          action: insert
+
+    # Attributes processor for adding metadata
+    attributes:
+      actions:
+        - key: environment
+          value: staging
+          action: insert
+
   receivers:
     jaeger:
       protocols:
@@ -283,8 +354,13 @@ config:
       logs:
         exporters:
           - debug
+          - otlp_http/loki
         processors:
           - memory_limiter
+          - k8s_attributes
+          - resource
+          - resourcedetection
+          - attributes
           - batch
         receivers:
           - otlp
