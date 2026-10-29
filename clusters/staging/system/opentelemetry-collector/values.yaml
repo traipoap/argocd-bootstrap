@@ -353,7 +353,7 @@ config:
     pipelines:
       logs:
         exporters:
-          - debug
+          # - debug
           - otlp_http/loki
         processors:
           - memory_limiter
@@ -366,7 +366,7 @@ config:
           - otlp
       metrics:
         exporters:
-          - debug
+          # - debug
         processors:
           - memory_limiter
           - batch
@@ -376,7 +376,7 @@ config:
           - prometheus
       traces:
         exporters:
-          - debug
+          # - debug
         processors:
           - memory_limiter
           - batch
