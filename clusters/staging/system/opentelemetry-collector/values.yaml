@@ -363,7 +363,7 @@ config:
         exporters: [otlp/traces]
       # Metrics pipeline - receive metrics from multiple sources
       metrics:
-        receivers: [prometheus, hostmetrics, prometheus/node_exporter]
+        receivers: [hostmetrics, prometheus/node_exporter]
         processors: [memory_limiter, resourcedetection, attributes, batch]
         exporters: [prometheus, prometheusremotewrite]
       # Logs pipeline - receive OTLP logs and forward to Loki
