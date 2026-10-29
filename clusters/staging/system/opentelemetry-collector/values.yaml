@@ -320,11 +320,12 @@ config:
       endpoint: http://infra-prometheus-server.prometheus.svc.cluster.local/api/v1/write
       tls:
         insecure: true
-    # Loki exporter for logs
-    otlp_http/loki:
-      endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
-      tls:
-        insecure: true
+    # Loki exporter for logs (native format)
+    loki:
+      endpoint: http://infra-loki.loki.svc.cluster.local:3100/loki/api/v1/push
+      tenant_id: "otel"
+      external_labels:
+        environment: staging
       sending_queue:
         enabled: true
         queue_size: 5000
@@ -370,7 +371,7 @@ config:
       logs:
         receivers: [otlp]
         processors: [memory_limiter, k8s_attributes, resource, resourcedetection, attributes, batch]
-        exporters: [otlp_http/loki]
+        exporters: [loki]
 
 # Helm currently has an issue (https://github.com/helm/helm/pull/12879) when using null to remove
 # default configuration from a subchart. The result is that you cannot remove default configuration
