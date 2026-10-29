@@ -226,18 +226,26 @@ config:
         http:
           endpoint: 0.0.0.0:4318
     hostmetrics:
-          collection_interval: 30s
-          scrapers:
-            cpu:
-            memory:
-            disk:
-            filesystem:
-            load:
-            network:
-            process:
-              mute_process_name_error: true
-              mute_process_io_error: true
-              mute_process_user_error: true
+      collection_interval: 30s
+      scrapers:
+        cpu:
+        memory:
+        disk:
+        filesystem:
+        load:
+        network:
+        process:
+          mute_process_name_error: true
+          mute_process_io_error: true
+          mute_process_user_error: true
+    # Node Exporter metrics (scrape node_exporter directly)
+    prometheus/node_exporter:
+      config:
+        scrape_configs:
+          - job_name: 'node-exporter'
+            scrape_interval: 30s
+            static_configs:
+              - targets: ['localhost:9100']
   processors:
     # Batch processor for better performance
     batch:
@@ -300,21 +308,14 @@ config:
         - key: environment
           value: non-production
           action: insert
-  extensions:
-    # The health_check extension is mandatory for this chart.
-    # Without the health_check extension the collector will fail the readiness and liveness probes.
-    # The health_check extension can be modified, but should never be removed.
-    health_check:
-      endpoint: ${env:OTEL_K8S_POD_IP}:13133
-
   exporters:
-    # Prometheus exporter for metrics
+    # Prometheus exporter for metrics (used by Prometheus scrape)
     prometheus:
       endpoint: "0.0.0.0:8889"
       namespace: otel
       const_labels:
         environment: nonprod
-    # Prometheus Remote Write (if using Prometheus server)
+    # Prometheus Remote Write (forward to Prometheus server)
     prometheusremotewrite:
       endpoint: http://infra-prometheus-server.prometheus.svc.cluster.local/api/v1/write
       tls:
@@ -324,7 +325,6 @@ config:
       endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
       tls:
         insecure: true
-      # Optimization for cross-region or network latency
       sending_queue:
         enabled: true
         queue_size: 5000
@@ -332,26 +332,38 @@ config:
         enabled: true
         initial_interval: 5s
         max_elapsed_time: 300s
+    # OTLP exporter for traces (forward to Tempo/Jaeger backend)
+    otlp/traces:
+      endpoint: http://infra-tempo.tempo.svc.cluster.local:4317
+      tls:
+        insecure: true
+      sending_queue:
+        enabled: true
+        queue_size: 1000
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_elapsed_time: 300s
 
   service:
     extensions:
-    - health_check
+      - health_check
     pipelines:
-      # Traces pipeline
+      # Traces pipeline - receive OTLP traces and forward to Tempo
       traces:
         receivers: [otlp]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        exporters: [otlp_http/loki]
-      # Metrics pipeline
+        exporters: [otlp/traces]
+      # Metrics pipeline - receive metrics from multiple sources
       metrics:
-        receivers: [otlp, hostmetrics]
+        receivers: [prometheus, hostmetrics, prometheus/node_exporter]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        exporters: [prometheus, prometheusremotewrite] #, debug]
-      # Logs pipeline
+        exporters: [prometheus, prometheusremotewrite]
+      # Logs pipeline - receive OTLP logs and forward to Loki
       logs:
         receivers: [otlp]
         processors: [memory_limiter, k8s_attributes, resource, resourcedetection, attributes, batch]
-        exporters: [otlp_http/loki] #, debug]
+        exporters: [otlp_http/loki]
 
 # Helm currently has an issue (https://github.com/helm/helm/pull/12879) when using null to remove
 # default configuration from a subchart. The result is that you cannot remove default configuration
@@ -505,6 +517,11 @@ ports:
     enabled: false
     containerPort: 8888
     servicePort: 8888
+    protocol: TCP
+  prometheus:
+    enabled: true
+    containerPort: 8889
+    servicePort: 8889
     protocol: TCP
 
 # When enabled, the chart will set the GOMEMLIMIT env var to 80% of the configured resources.limits.memory.
