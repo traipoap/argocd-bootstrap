@@ -59,21 +59,16 @@ loki:
     retention_delete_delay: 2h
     retention_delete_worker_count: 16
 
-# Service configuration - NodePort for ALB integration
-service:
-  type: NodePort
-  port: 3100
-  nodePort: 30100
-
 # Gateway configuration (nginx)
 gateway:
   enabled: false
   replicas: 1
 
-  service:
-    type: NodePort
-    port: 80
-    nodePort: 30101
+# Service configuration - NodePort for ALB integration
+service:
+  type: ClusterIP
+  port: 3100
+  nodePort: 30100
 
   resources:
     limits:
