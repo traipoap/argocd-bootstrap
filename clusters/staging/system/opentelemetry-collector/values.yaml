@@ -218,7 +218,7 @@ rewriteDeprecatedComponentNames: true
 # @default -- OTLP receivers plus the debug exporter wired into logs, metrics and traces pipelines; see [values.yaml](./values.yaml)
 config:
   exporters:
-    debug: {}
+    # debug: {}
     # Loki exporter for logs
     otlp_http/loki:
       endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
