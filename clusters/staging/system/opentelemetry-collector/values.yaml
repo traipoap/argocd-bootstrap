@@ -327,6 +327,8 @@ config:
         max_elapsed_time: 300s
 
   service:
+    extensions:
+    - health_check
     pipelines:
       # Traces pipeline
       traces:
