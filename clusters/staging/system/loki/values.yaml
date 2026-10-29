@@ -559,6 +559,13 @@ loki:
     {{- end }}
   # Should authentication be enabled
   auth_enabled: false
+  # -- OTLP receiver for logs from OpenTelemetry Collector
+  otlp_config:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4319"
+      http:
+        endpoint: "0.0.0.0:4318"
   # @schema skipProperties:true;additionalProperties:true
   # -- memberlist configuration (overrides embedded default)
   memberlistConfig: {}
