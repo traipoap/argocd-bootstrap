@@ -615,6 +615,13 @@ loki:
     http_server_read_timeout: 10m0s
     http_server_write_timeout: 10m0s
     log_level: info
+  # @schema skipProperties:true;additionalProperties:true
+  otlp_config:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4319"
+      http:
+        endpoint: "0.0.0.0:4318"
   service:
     # -- trafficDistribution for services
     # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#traffic-distribution
