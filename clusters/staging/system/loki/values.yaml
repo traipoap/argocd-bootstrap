@@ -1253,7 +1253,7 @@ memberlist:
 # Configuration for the gateway
 gateway:
   # -- Specifies whether the gateway should be enabled
-  enabled: true
+  enabled: false
   # @schema enum:[nginx, envoy]
   # -- Selects the gateway proxy implementation. The Envoy implementation is EXPERIMENTAL and opt-in; its values under `gateway.envoyConfig` and the rendered Envoy configuration may change in minor releases.
   type: nginx
