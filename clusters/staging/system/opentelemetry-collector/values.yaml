@@ -341,7 +341,7 @@ config:
       traces:
         receivers: [otlp]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        exporters: []
+        # exporters: [debug]
       # Metrics pipeline
       metrics:
         receivers: [otlp, hostmetrics]
