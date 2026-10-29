@@ -220,7 +220,7 @@ config:
   exporters:
     debug: {}
     # Loki exporter for logs
-    otlp_http/loki:
+    otlphttp/loki:
       endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
       tls:
         insecure: true
@@ -354,7 +354,7 @@ config:
       logs:
         exporters:
           - debug
-          - otlp_http/loki
+          - otlphttp/loki
         processors:
           - memory_limiter
           - k8s_attributes
