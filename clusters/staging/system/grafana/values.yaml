@@ -477,13 +477,13 @@ listenerSet:
     #     namespaces:
     #       from: Same
 
-resources: {}
-#  limits:
-#    cpu: 100m
-#    memory: 128Mi
-#  requests:
-#    cpu: 100m
-#    memory: 128Mi
+resources:
+  limits:
+    cpu: 500m
+    memory: 768Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
 
 ## Configure the GOMEMLIMIT environment variable.
 ## When enabled and resources.limits.memory is set, GOMEMLIMIT is injected
