@@ -31,7 +31,7 @@ presets:
   # See https://opentelemetry.io/docs/kubernetes/collector/components/#filelog-receiver for details on the receiver.
   logsCollection:
     enabled: true
-    includeCollectorLogs: false
+    includeCollectorLogs: true
     # -- Enabling this writes checkpoints in /var/lib/otelcol/ host directory.
     # Note this changes collector's user to root, so that it can write to host directory.
     storeCheckpoints: true
@@ -44,7 +44,7 @@ presets:
   # Best used with mode = daemonset.
   # See https://opentelemetry.io/docs/kubernetes/collector/components/#host-metrics-receiver for details on the receiver.
   hostMetrics:
-    enabled: false
+    enabled: true
   # Configures the Kubernetes Processor to add Kubernetes metadata.
   # Adds the k8s_attributes processor to all the pipelines
   # and adds a preset of minimum required RBAC rules to ClusterRole.
