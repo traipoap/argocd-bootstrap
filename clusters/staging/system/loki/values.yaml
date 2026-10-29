@@ -630,7 +630,7 @@ loki:
     max_cache_freshness_per_query: 10m
     split_queries_by_interval: 15m
     query_timeout: 300s
-    volume_enabled: true
+    # volume_enabled: true
   # -- Provides a reloadable runtime configuration file for some specific configuration
   runtimeConfig: {}
   # @schema skipProperties:true;additionalProperties:true
