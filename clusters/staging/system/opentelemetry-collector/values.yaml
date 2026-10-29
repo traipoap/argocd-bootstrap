@@ -344,7 +344,7 @@ config:
         exporters: [debug]
       # Metrics pipeline
       metrics:
-        receivers: [otlp, prometheus, hostmetrics]
+        receivers: [otlp, hostmetrics]
         processors: [memory_limiter, resourcedetection, attributes, batch]
         exporters: [prometheus, prometheusremotewrite] #, debug]
       # Logs pipeline
