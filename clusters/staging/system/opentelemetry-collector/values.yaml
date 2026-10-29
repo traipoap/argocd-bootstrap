@@ -320,12 +320,9 @@ config:
       endpoint: http://infra-prometheus-server.prometheus.svc.cluster.local/api/v1/write
       tls:
         insecure: true
-    # Loki exporter for logs (native format)
-    loki:
-      endpoint: http://infra-loki.loki.svc.cluster.local:3100/loki/api/v1/push
-      tenant_id: "otel"
-      external_labels:
-        environment: staging
+    # Loki exporter for logs (OTLP format → Loki OTLP receiver)
+    otlphttp/loki:
+      endpoint: http://infra-loki.loki.svc.cluster.local:4318/otlp/v1/logs
       sending_queue:
         enabled: true
         queue_size: 5000
