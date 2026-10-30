@@ -842,12 +842,10 @@ datasources:
       type: loki
       url: http://infra-loki.loki.svc.cluster.local:3100
       access: proxy
-      isDefault: true
     - name: Tempo
       type: tempo
       url: http://infra-tempo.tempo.svc.cluster.local:3200
       access: proxy
-      isDefault: true
 
 #  datasources.yaml:
 #    apiVersion: 1
