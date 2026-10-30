@@ -226,6 +226,86 @@ config:
         http:
           endpoint: 0.0.0.0:4318
 
+    # Prometheus receiver to scrape metrics
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: 'otel-collector'
+            scrape_interval: 30s
+            static_configs:
+              - targets: ['localhost:8888']
+
+          # Kubernetes service discovery
+          - job_name: 'kubernetes-pods'
+            scrape_interval: 30s
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                action: replace
+                regex: ([^:]+)(?::\d+)?;(\d+)
+                replacement: $1:$2
+                target_label: __address__
+
+    # Filelog receiver to tail all pod logs from the node
+    filelog:
+      include:
+        - /var/log/pods/*/*/*.log
+      exclude:
+        # Exclude collector logs to avoid loop
+        - /var/log/pods/opentelemetry-collector_-*/*/*.log
+      start_at: end
+      include_file_path: true
+      include_file_name: false
+      operators:
+        # Extract metadata from the path
+        - type: regex_parser
+          regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-z0-9-]+)/(?P<container_name>[^_]+)/.+$'
+          parse_from: attributes["log.file.path"]
+        # Move extracted labels to resource attributes for Loki and k8sattributes processor
+        - type: move
+          from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+        - type: move
+          from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+        - type: move
+          from: attributes.uid
+          to: resource["k8s.pod.uid"]
+        - type: move
+          from: attributes.container_name
+          to: resource["k8s.container.name"]
+        # Parse container logs (JSON for containerd/k3s)
+        - type: container
+          id: container-parser
+        # Additional parser for service-guess CLF logs to extract labels at ingestion time
+        - type: regex_parser
+          id: clf-parser
+          # skip Date Time prefixes if present, then capture CLF fields
+          regex: '^(?:(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2})\t)?(?P<ip>[^ ]+) - - \[(?P<ts>[^\]]+)\] "(?P<method>\w+) (?P<path>[^ ]+) (?P<proto>[^"]+)" (?P<status>\d+) (?P<size>[^ ]+) (?P<latency>\d+) "(?P<msg>[^"]+)" \[TraceID: (?P<tid>[^\]]+)\]$'
+          parse_from: body
+          # Apply to all services in the apps namespace following the standardized CLF format
+          if: 'resource["k8s.namespace.name"] == "apps"'
+
+    # Host metrics receiver
+    hostmetrics:
+      collection_interval: 30s
+      scrapers:
+        cpu:
+        disk:
+        filesystem:
+        load:
+        memory:
+        network:
+        paging:
+
   processors:
     # Batch processor for better performance
     batch:
@@ -270,6 +350,7 @@ config:
               name: k8s.pod.uid
         - sources:
             - from: connection
+
     # Resource processor to create user-friendly labels for Loki
     resource:
       attributes:
@@ -282,6 +363,18 @@ config:
         - key: container
           from_attribute: k8s.container.name
           action: insert
+
+        # Promote extracted CLF fields to indexed labels
+        - key: status
+          from_attribute: status
+          action: insert
+        - key: method
+          from_attribute: method
+          action: insert
+        - key: path
+          from_attribute: path
+          action: insert
+
     # Attributes processor for adding metadata
     attributes:
       actions:
@@ -296,14 +389,28 @@ config:
       namespace: otel
       const_labels:
         environment: nonprod
+
     # Prometheus Remote Write (forward to Prometheus server)
     prometheusremotewrite:
       endpoint: http://infra-prometheus-server.prometheus.svc.cluster.local/api/v1/write
       tls:
         insecure: true
+      # Use the specific queue for this exporter
+      remote_write_queue:
+        enabled: true
+        queue_size: 10000  # Increase this for cross-region
+        num_consumers: 5
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_elapsed_time: 300s
+
     # Loki exporter for logs (OTLP format → Loki OTLP receiver)
     otlphttp/loki:
       endpoint: http://infra-loki.loki.svc.cluster.local:4318/otlp/v1/logs
+      tls:
+        insecure: true
+      # Optimization for cross-region or network latency
       sending_queue:
         enabled: true
         queue_size: 5000
@@ -311,6 +418,7 @@ config:
         enabled: true
         initial_interval: 5s
         max_elapsed_time: 300s
+
     # OTLP exporter for traces (forward to Tempo/Jaeger backend)
     otlp/traces:
       endpoint: http://infra-tempo.tempo.svc.cluster.local:4317
