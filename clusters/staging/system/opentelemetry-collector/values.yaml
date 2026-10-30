@@ -339,7 +339,7 @@ config:
       traces:
         receivers: [otlp]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        # exporters: [debug]
+        exporters: [otlp/traces]
       # Metrics pipeline - receive metrics from multiple sources
       metrics:
         receivers: [otlp, prometheus, hostmetrics]
