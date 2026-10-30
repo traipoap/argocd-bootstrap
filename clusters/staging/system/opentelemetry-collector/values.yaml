@@ -563,22 +563,22 @@ extraEnvs: []
 extraEnvsFrom: []
 # -- This also supports template content, which will eventually be converted to yaml.
 # Volumes for host logs
-extraVolumes:
-  - name: varlogpods
-    hostPath:
-      path: /var/log/pods
-  - name: varlibdockercontainers
-    hostPath:
-      path: /var/lib/docker/containers
+# extraVolumes:
+#   - name: varlogpods
+#     hostPath:
+#       path: /var/log/pods
+#   - name: varlibdockercontainers
+#     hostPath:
+#       path: /var/lib/docker/containers
 
 # -- This also supports template content, which will eventually be converted to yaml.
-extraVolumeMounts:
-  - name: varlogpods
-    mountPath: /var/log/pods
-    readOnly: true
-  - name: varlibdockercontainers
-    mountPath: /var/lib/docker/containers
-    readOnly: true
+# extraVolumeMounts:
+#   - name: varlogpods
+#     mountPath: /var/log/pods
+#     readOnly: true
+#   - name: varlibdockercontainers
+#     mountPath: /var/lib/docker/containers
+#     readOnly: true
 
 # -- This also supports template content, which will eventually be converted to yaml.
 extraManifests: []
