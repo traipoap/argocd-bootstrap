@@ -5,7 +5,9 @@ metadata:
   namespace: grafana
 spec:
   parentRefs:
-  - name: app-gateway
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: app-gateway
     namespace: istio-system
   hostnames:
   - "grafana.traipoap.com"
