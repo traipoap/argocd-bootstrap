@@ -30,3 +30,8 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          # Server-side apply: avoids the kubectl.kubernetes.io/last-applied-configuration
+          # annotation, which overflows the 256 KiB metadata.annotations limit on the
+          # large secretstores/clustersecretstores CRDs (client-side 3-way merge fails
+          # with "metadata.annotations: Too long" on them).
+          - ServerSideApply=true
