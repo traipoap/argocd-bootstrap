@@ -17,5 +17,8 @@ spec:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: infra-grafana
+    - group: ''
+      kind: Service
+      name: infra-grafana
       port: 80
+      weight: 1
