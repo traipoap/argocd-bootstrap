@@ -344,12 +344,12 @@ config:
       metrics:
         receivers: [otlp, prometheus, hostmetrics]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        exporters: [prometheus, prometheusremotewrite, debug]
+        exporters: [prometheus, prometheusremotewrite]
       # Logs pipeline - receive OTLP logs and forward to Loki
       logs:
         receivers: [otlp, filelog]
         processors: [memory_limiter, k8sattributes, resource, resourcedetection, attributes, batch]
-        exporters: [otlphttp/loki, debug]
+        exporters: [otlphttp/loki]
 
 # Helm currently has an issue (https://github.com/helm/helm/pull/12879) when using null to remove
 # default configuration from a subchart. The result is that you cannot remove default configuration
