@@ -1104,7 +1104,7 @@ lokiCanary:
       # -- Pod Disruption Budget maxUnavailable
       maxUnavailable: 1
   # -- Replicas for `loki-canary` when using a Deployment
-  replicas: 0
+  replicas: 1
   # -- Tenant to use for loki-canary
   tenant:
     # -- Name of the tenant for loki-canary
@@ -2048,7 +2048,7 @@ singleBinary:
   # @schema type:[integer, null]
   # -- Number of replicas for the single binary. Set to null to omit spec.replicas from the workload,
   # allowing an external controller (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
-  replicas: 0
+  replicas: 1
   # -- EXPERIMENTAL: Enable creating a Job to recreate the write StatefulSet when the compactor configuration is changed.
   ## Only applicable if `compactor.kind` is StatefulSet. Useful for PVC size changes, which require recreating the StatefulSet.
   statefulSetRecreateJob:
@@ -3115,7 +3115,7 @@ backend:
 # -- Configuration for the ingester
 ingester:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of compactor deployment. StatefulSet and Deployment are supported.
   kind: StatefulSet
   # -- EXPERIMENTAL: Enable creating a Job to recreate the ingester StatefulSet
@@ -3539,7 +3539,7 @@ ingester:
 # -- Configuration for the distributor
 distributor:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # @schema type:[integer, null]
   # -- Number of replicas for the distributor. Set to null to omit spec.replicas from the workload,
   # allowing an external controller (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
@@ -3806,7 +3806,7 @@ distributor:
 # -- Configuration for the querier
 querier:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of compactor deployment. StatefulSet and Deployment are supported.
   kind: Deployment
   # @schema type:[integer, null]
@@ -4089,7 +4089,7 @@ querier:
 # -- Configuration for the query-frontend
 queryFrontend:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of compactor deployment. StatefulSet and Deployment are supported.
   kind: Deployment
   # @schema type:[integer, null]
@@ -4350,7 +4350,7 @@ queryFrontend:
 # -- Configuration for the query-scheduler
 queryScheduler:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of query-scheduler deployment. StatefulSet and Deployment are supported.
   kind: Deployment
   # @schema type:[integer, null]
@@ -4361,6 +4361,7 @@ queryScheduler:
   # (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
   replicas: 0
   # @schema skipProperties:true;additionalProperties:true
+  # -- UpdateStrategy or Strategy for the query-scheduler.
   # -- Strategy for the query-scheduler.
   strategy:
     type: RollingUpdate
@@ -4552,7 +4553,7 @@ queryScheduler:
 # -- Configuration for the index-gateway
 indexGateway:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of index-gateway deployment. StatefulSet and Deployment are supported.
   kind: StatefulSet
   # -- EXPERIMENTAL: Enable creating a Job to recreate the compactor StatefulSet when the compactor configuration is changed.
@@ -4792,7 +4793,7 @@ indexGateway:
 # -- Configuration for the compactor
 compactor:
   # -- Enable the component. Requires `loki.deploymentMode` to be set to `Distributed`.
-  enabled: true
+  enabled: false
   # -- Kind of compactor deployment. StatefulSet and Deployment are supported.
   kind: StatefulSet
   # -- EXPERIMENTAL: Enable creating a Job to recreate the compactor StatefulSet when the compactor configuration is changed.
@@ -5051,7 +5052,7 @@ bloomGateway:
   statefulSetRecreateJob:
     enabled: false
   # -- Number of replicas for the bloom-gateway
-  replicas: 0
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   # @schema type:[boolean, null]
@@ -5283,7 +5284,7 @@ bloomPlanner:
   statefulSetRecreateJob:
     enabled: false
   # -- Number of replicas for the bloom-planner
-  replicas: 0
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   # @schema type:[boolean, null]
@@ -5517,7 +5518,7 @@ bloomBuilder:
   # @schema type:[integer, null]
   # -- Number of replicas for the bloom-builder. Set to null to omit spec.replicas from the workload,
   # allowing an external controller (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
-  replicas: 0
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   # @schema type:[boolean, null]
@@ -5800,7 +5801,7 @@ patternIngester:
   # @schema type:[integer, null]
   # -- Number of replicas for the pattern ingester. Set to null to omit spec.replicas from the workload,
   # allowing an external controller (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
-  replicas: 0
+  replicas: 1
   # @schema skipProperties:true;additionalProperties:true
   # -- UpdateStrategy or Strategy for the pattern ingester.
   strategy:
@@ -6288,7 +6289,7 @@ overridesExporter:
   # @schema type:[integer, null]
   # -- Number of replicas for the overrides-exporter. Set to null to omit spec.replicas from the workload,
   # allowing an external controller (e.g. HPA, KEDA, rollout-operator) to manage replica counts without Helm resetting them.
-  replicas: 0
+  replicas: 1
   # @schema additionalProperties:true
   # -- DNSConfig for overrides-exporter
   dnsConfig: {}
