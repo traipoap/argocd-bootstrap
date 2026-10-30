@@ -245,7 +245,7 @@ config:
       auth_type: "serviceAccount"
       passthrough: false
       filter:
-        node_from_env_var: KUBE_NODE_NAME
+        node_from_env_var: OTEL_K8S_NODE_NAME
       extract:
         metadata:
           - k8s.pod.name
@@ -290,6 +290,8 @@ config:
           action: insert
 
   exporters:
+    debug: {}
+
     # Prometheus exporter for metrics (used by Prometheus scrape)
     prometheus:
       endpoint: "0.0.0.0:8889"
