@@ -342,12 +342,12 @@ config:
         exporters: [otlp/traces]
       # Metrics pipeline - receive metrics from multiple sources
       metrics:
-        receivers: [otlp, prometheus, hostmetrics]
+        receivers: [otlp]
         processors: [memory_limiter, resourcedetection, attributes, batch]
         exporters: [prometheus, prometheusremotewrite]
       # Logs pipeline - receive OTLP logs and forward to Loki
       logs:
-        receivers: [otlp, filelog]
+        receivers: [otlp]
         processors: [memory_limiter, k8sattributes, resource, resourcedetection, attributes, batch]
         exporters: [otlphttp/loki]
 
