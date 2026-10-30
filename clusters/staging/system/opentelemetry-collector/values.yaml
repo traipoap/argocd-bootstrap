@@ -290,8 +290,6 @@ config:
           action: insert
 
   exporters:
-    debug: {}
-
     # Prometheus exporter for metrics (used by Prometheus scrape)
     prometheus:
       endpoint: "0.0.0.0:8889"
@@ -341,7 +339,7 @@ config:
       traces:
         receivers: [otlp]
         processors: [memory_limiter, resourcedetection, attributes, batch]
-        exporters: [debug]
+        # exporters: [debug]
       # Metrics pipeline - receive metrics from multiple sources
       metrics:
         receivers: [otlp, prometheus, hostmetrics]
