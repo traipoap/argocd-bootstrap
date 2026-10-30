@@ -455,7 +455,7 @@ config:
         exporters: [prometheus, prometheusremotewrite]
       # Logs pipeline - receive OTLP logs and forward to Loki
       logs:
-        receivers: [otlp]
+        receivers: [otlp, filelog]
         processors: [memory_limiter, k8sattributes, resource, resourcedetection, attributes, batch]
         exporters: [otlphttp/loki]
 
