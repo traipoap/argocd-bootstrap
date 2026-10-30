@@ -845,7 +845,7 @@ datasources:
       isDefault: true
     - name: tempo
       access: proxy
-      type: tempo
+      type: Tempo
       url: http://infra-tempo.tempo.svc.cluster.local:3200
       isDefault: true
 
