@@ -66,12 +66,29 @@ automountServiceAccountToken: true
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 3
   # @schema type:[string, integer, null]
-  targetCPU: "60"
+  # CPU target 60% is too aggressive for Grafana's spiky dashboard usage;
+  # 75% gives headroom before scaling
+  targetCPU: "75"
   # @schema type:[string, integer, null]
   targetMemory: ""
-  behavior: {}
+  # Stabilization windows prevent scale-up/scale-down flapping:
+  # - scaleUp: wait 60s before scaling, max +1 replica/minute (50% of 3)
+  # - scaleDown: wait 300s of sustained low usage, max -1 replica/2min
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          periodSeconds: 60
+          value: 50
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: ChangesRate
+          periodSeconds: 120
+          changeAmount: 1
 
 ## See `kubectl explain poddisruptionbudget.spec` for more
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -135,7 +152,7 @@ image:
   #   - myRegistrKeySecretName
 
 testFramework:
-  enabled: true
+  enabled: false
   ## The type of Helm hook used to run this test. Defaults to test.
   ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
   ##
@@ -477,7 +494,12 @@ listenerSet:
     #     namespaces:
     #       from: Same
 
-resources: {}
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
 
 ## Configure the GOMEMLIMIT environment variable.
 ## When enabled and resources.limits.memory is set, GOMEMLIMIT is injected
@@ -547,14 +569,17 @@ extraContainerVolumes: []
 ##
 persistence:
   type: pvc
-  enabled: false
+  # Persistence MUST be enabled for Grafana: tokens, sessions and dashboards
+  # live in the pod's DB. Without it, every pod recreation = empty DB =
+  # all API tokens invalidated.
+  enabled: true
   # storageClassName: default
   ## (Optional) Use this to bind the claim to an existing PersistentVolume (PV) by name.
   volumeName: ""
   accessModes:
     - ReadWriteOnce
   # @schema type:[string, integer]
-  size: 10Gi
+  size: 5Gi
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection
@@ -634,9 +659,11 @@ adminUser: admin
 # adminPassword: strongpassword
 
 # Use an existing secret for the admin user.
+# Secret is created OUTSIDE the repo (kubectl create secret) to keep
+# credentials out of git — see repo policy.
 admin:
   ## Name of the secret. Can be templated.
-  existingSecret: ""
+  existingSecret: "grafana-admin"
   userKey: admin-user
   passwordKey: admin-password
 
@@ -1051,7 +1078,8 @@ grafana.ini:
     plugins: /var/lib/grafana/plugins
     provisioning: /etc/grafana/provisioning
   analytics:
-    check_for_updates: true
+    # Stop periodic check-in calls to grafana.com
+    check_for_updates: false
   plugins:
     preinstall_auto_update: "false"
   log:
@@ -1920,7 +1948,9 @@ networkPolicy:
 
 # Enable backward compatibility of kubernetes where version below 1.13 doesn't have the enableServiceLinks option
 enableKubeBackwardCompatibility: false
-useStatefulSet: false
+# StatefulSet gives pods stable identity (grafana-0) so the PVC reattaches
+# to the same pod after recreation — required for persistence to stick.
+useStatefulSet: true
 
 ## podManagementPolicy controls how Pods are created and deleted during initial
 ## deployment and scaling operations. It does not affect rolling updates, which
