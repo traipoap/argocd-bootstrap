@@ -496,9 +496,10 @@ listenerSet:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 1m
+    memory: 1Mi
   limits:
+    cpu: 512Mi
     memory: 512Mi
 
 ## Configure the GOMEMLIMIT environment variable.
@@ -846,6 +847,16 @@ datasources:
       type: tempo
       url: http://infra-tempo.tempo.svc.cluster.local:3200
       access: proxy
+      editable: true
+      jsonData:
+        nodeGraph:
+          enabled: true
+        # Link traces → your log datasource (Loki/Quickwit) by setting its UID:
+        # tracesToLogs:
+        #   datasourceUid: <your-logs-datasource-uid>
+        # Service map needs a metrics datasource (Prometheus):
+        # serviceMap:
+        #   datasourceUid: <prometheus-uid>
 
 #  datasources.yaml:
 #    apiVersion: 1
