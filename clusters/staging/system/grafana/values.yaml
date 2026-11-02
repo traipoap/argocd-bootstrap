@@ -499,7 +499,7 @@ resources:
     cpu: 1m
     memory: 1Mi
   limits:
-    cpu: 512Mi
+    cpu: 512m
     memory: 512Mi
 
 ## Configure the GOMEMLIMIT environment variable.
