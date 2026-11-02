@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-image-updater-config
+  namespace: argocd
+data:
+  log.level: info
+  log.format: json
+  git.user: image-updater
+  git.email: image-updater@traipoap.com
+  registries.conf: |
+    registries:
+    - name: ghcr
+      prefix: ghcr.io
+      api_url: https://ghcr.io
+      # Controller only reads secrets from its own namespace (argocd).
+      # Create it (outside of Git): kubectl -n argocd create secret docker-registry github-registry \
+      #   --docker-server=ghcr.io --docker-username=<gh-user> --docker-password=<GHCR_PAT>
+      # (PAT scope: read:packages). Not needed if the ghcr.io/traipoap repos are public.
+      credentials: pullsecret:argocd/github-credentials

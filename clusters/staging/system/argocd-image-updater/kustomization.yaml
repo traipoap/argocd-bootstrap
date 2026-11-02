@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Force the `argocd` namespace for all namespaced resources.
+#
+# Why: the infra ApplicationSet (bootstrap/applicationsets/infrastructure-appset.yaml)
+# uses this directory's basename (`argocd-image-updater`) as the app destination
+# namespace, but the upstream docs (Option 1, "Choosing an installation
+# namespace") require the controller AND the ImageUpdater CR to live in the
+# same namespace as the Argo CD Applications (i.e. `argocd`):
+#   - the default controller watch scope is its own namespace only
+#   - the controller's namespace-scoped RBAC (Role/RoleBinding) only grants
+#     access to imageupdaters/applications in its own namespace
+#   - this also aligns with the metrics ClusterRoleBindings, which hardcode
+#     the ServiceAccount subject in the `argocd` namespace
+namespace: argocd
+resources:
+  # Vendor of https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/config/install.yaml
+  # (the empty argocd-image-updater-config ConfigMap was removed from it,
+  #  replaced by argocd-image-updater-config.yaml below)
+  - argocd-image-updater.yaml
+  - argocd-image-updater-config.yaml
+  - image-updater.yaml
