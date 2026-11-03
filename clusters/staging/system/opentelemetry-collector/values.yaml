@@ -307,15 +307,18 @@ config:
         paging:
 
   processors:
-    # Batch processor for better performance
+    # Batch processor for better performance (smaller batches = less in-flight memory)
     batch:
-      timeout: 10s
-      send_batch_size: 1024
-    # Memory limiter to prevent OOM
+      timeout: 5s
+      send_batch_size: 512
+    # Memory limiter to prevent OOM.
+    # Cap well below the 512Mi container limit (GOMEMLIMIT = 410Mi) so the
+    # collector throttles ingestion before the Go heap hits the hard limit
+    # (pods previously sat at ~480Mi RSS with the old 400+100 limits).
     memory_limiter:
       check_interval: 5s
-      limit_mib: 400
-      spike_limit_mib: 100
+      limit_mib: 300
+      spike_limit_mib: 60
     # Resource detection for Kubernetes
     resourcedetection:
       detectors: [env, system]
@@ -398,7 +401,7 @@ config:
       # Use the specific queue for this exporter
       remote_write_queue:
         enabled: true
-        queue_size: 10000  # Increase this for cross-region
+        queue_size: 1000  # in-cluster endpoint; 10000 (cross-region) was needless memory
         num_consumers: 5
       retry_on_failure:
         enabled: true
@@ -410,10 +413,10 @@ config:
       endpoint: http://infra-loki.loki.svc.cluster.local:4318/otlp/v1/logs
       tls:
         insecure: true
-      # Optimization for cross-region or network latency
+      # In-cluster Loki endpoint; smaller queue bounds log memory under backlog
       sending_queue:
         enabled: true
-        queue_size: 5000
+        queue_size: 1000
       retry_on_failure:
         enabled: true
         initial_interval: 5s
