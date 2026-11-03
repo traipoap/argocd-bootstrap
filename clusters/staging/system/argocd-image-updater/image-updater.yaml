@@ -8,7 +8,10 @@ spec:
     updateStrategy: "semver"
     forceUpdate: true
   writeBackConfig:
-    method: "git"
+    # `git:secret:<ns>/<name>` selects the SSH credentials secret used for the
+    # write-back push (field: sshPrivateKey). Plain `git` would look up Argo CD
+    # repo credentials (repocreds), which are not set for this SSH URL.
+    method: "git:secret:argocd/ssh-git-creds"
     gitConfig:
       repository: "git@github.com:traipoap/argocd-bootstrap.git"
       branch: "main"
@@ -25,13 +28,18 @@ spec:
     - namePattern: "my-app-staging"
       images:
         - alias: "backend"
-          imageName: "ghcr.io/traipoap/backend:0.0.69"
+          # The tag part of imageName is a SEMVER CONSTRAINT, not the current
+          # tag. A bare version (e.g. 0.0.69) means "only that exact version",
+          # which silently blocks all updates. 0.0.x = track all patches of the
+          # 0.0 series, skipping 0.1.0+/1.0.0+ automatically.
+          imageName: "ghcr.io/traipoap/backend:0.0.x"
           manifestTargets:
             kustomize:
               # Must match the `name:` entry in the overlay kustomization's images list
               name: "ghcr.io/traipoap/backend"
         - alias: "frontend"
-          imageName: "ghcr.io/traipoap/frontend:0.0.68"
+          # Semver constraint: track the 0.0.x patch series (see backend above).
+          imageName: "ghcr.io/traipoap/frontend:0.0.x"
           manifestTargets:
             kustomize:
               name: "ghcr.io/traipoap/frontend"
