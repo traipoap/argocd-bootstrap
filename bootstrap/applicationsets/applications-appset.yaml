@@ -3,11 +3,6 @@ kind: ApplicationSet
 metadata:
   name: business-applications
   namespace: argocd
-  annotations:
-    argocd-image-updater.argoproj.io/image-list: ghcr.io/traipoap/frontend
-    argocd-image-updater.argoproj.io/ghcr.io.my-org.my-app.update-strategy: semver:~1.0
-    argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/git-branch: main
 spec:
   generators:
     - git:
