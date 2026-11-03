@@ -17,4 +17,7 @@ data:
       # Create it (outside of Git): kubectl -n argocd create secret docker-registry github-registry \
       #   --docker-server=ghcr.io --docker-username=<gh-user> --docker-password=<GHCR_PAT>
       # (PAT scope: read:packages). Not needed if the ghcr.io/traipoap repos are public.
-      credentials: pullsecret:argocd/github-credentials
+      # NOTE: must be `pullsecret:` (not `secret:`) because github-credentials is a
+      # kubernetes.io/dockerconfigjson pull secret (.dockerconfigjson field).
+      # `secret:<ns>/<name>#<field>` is for generic secrets with user:pass fields.
+      credentials: secret:argocd/github-credentials
