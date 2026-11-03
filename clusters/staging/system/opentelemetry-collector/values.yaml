@@ -410,8 +410,12 @@ config:
         max_elapsed_time: 300s
 
     # Loki exporter for logs (OTLP format → Loki OTLP receiver)
+    # Loki's OTLP receiver serves on port 3100 at path /otlp/v1/logs (see loki chart
+    # ingress paths). The otlphttp exporter appends "/v1/logs" to the endpoint itself,
+    # so the endpoint must end at /otlp — a full .../otlp/v1/logs endpoint produces
+    # a doubled path (404) and every log batch is dropped.
     otlphttp/loki:
-      endpoint: http://infra-loki.loki.svc.cluster.local:4318/otlp/v1/logs
+      endpoint: http://infra-loki.loki.svc.cluster.local:3100/otlp
       tls:
         insecure: true
       # In-cluster Loki endpoint; smaller queue bounds log memory under backlog
