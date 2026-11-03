@@ -20,4 +20,6 @@ data:
       # NOTE: must be `pullsecret:` (not `secret:`) because github-credentials is a
       # kubernetes.io/dockerconfigjson pull secret (.dockerconfigjson field).
       # `secret:<ns>/<name>#<field>` is for generic secrets with user:pass fields.
-      credentials: secret:argocd/github-credentials
+      # v1.x credential source syntax: github-credentials is a kubernetes.io/dockerconfigjson
+      # (pull) secret, so it must be referenced as pullsecret:<ns>/<name>.
+      credentials: pullsecret:argocd/github-credentials
