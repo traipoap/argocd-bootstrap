@@ -6,9 +6,11 @@ resources:
   - frontend-svc.yaml
 images:
   - name: ghcr.io/traipoap/backend
-    newTag: "0.0.69" # {"$imagepolicy": "staging:backend:tag"}
+    newTag: 0.0.72
+    newName: ghcr.io/traipoap/backend
   - name: ghcr.io/traipoap/frontend
-    newTag: "0.0.68" # {"$imagepolicy": "staging:frontend:tag"}
+    newTag: 0.0.73
+    newName: ghcr.io/traipoap/frontend
 patches:
   - path: patch-config.yaml
   - path: patch-httproute.yaml
