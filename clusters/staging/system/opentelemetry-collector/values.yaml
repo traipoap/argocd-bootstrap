@@ -254,10 +254,11 @@ config:
                 replacement: $1:$2
                 target_label: __address__
 
-    # Filelog receiver to tail all pod logs from the node
+    # Filelog receiver - tail pod logs from the staging namespace only
+    # (pod log path layout: /var/log/pods/<namespace>_<node>/<pod>_<uid>/<container>/*.log)
     filelog:
       include:
-        - /var/log/pods/*/*/*.log
+        - /var/log/pods/staging_*/*/*.log
       exclude:
         # Exclude collector logs to avoid loop
         - /var/log/pods/opentelemetry-collector_-*/*/*.log
