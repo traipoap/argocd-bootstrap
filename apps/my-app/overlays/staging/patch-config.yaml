@@ -13,3 +13,6 @@ data:
   OTEL_SERVICE_VERSION: "0.0.1"
   OTEL_TRACES_SAMPLER_RATIO: "1.0"
   # OTEL_TRACES_DISABLED: false
+  # Optional search engines (defaults match the code)
+  LOKI_URL: "http://infra-loki.loki.cluster.local:3100"
+  # ELASTICSEARCH_URL: "http://127.0.0.1:9200"
