@@ -6,7 +6,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- Valid values are "daemonset", "deployment", and "statefulset".
-mode: "daemonset"
+mode: "deployment"
 
 # -- Override the default apiVersion for custom controllers or for testing new API versions.
 apiVersion: "apps/v1"
@@ -64,16 +64,16 @@ presets:
   # Best used with mode = daemonset.
   # See https://opentelemetry.io/docs/kubernetes/collector/components/#kubeletstats-receiver for details on the receiver.
   kubeletMetrics:
-    enabled: false
+    enabled: true
   # Configures the collector to collect kubernetes events.
   # Adds the k8sobjects receiver to the logs pipeline
   # and collects kubernetes events by default.
   # Best used with mode = deployment or statefulset.
   # See https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-objects-receiver for details on the receiver.
   kubernetesEvents:
-    enabled: false
+    enabled: true
     # -- When enabled, the preset uses the k8s_events receiver instead of k8sobjects. Will default to true in a future release.
-    useK8sEventsReceiver: false
+    useK8sEventsReceiver: true
   # Collects Kubernetes objects via the k8sobjects receiver in pull mode (default interval: 1h).
   # Can be used with mode = deployment, statefulset, or daemonset.
   # Compatible with kubernetesEvents preset. Extra resources can be added via
@@ -118,7 +118,7 @@ presets:
   # When used as a daemonset or with multiple replicas, leader election is set up to prevent duplication.
   # See https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-cluster-receiver for details on the receiver.
   clusterMetrics:
-    enabled: false
+    enabled: true
     # When enabled with mode = daemonset or with multiple replicas, leader election is set up to prevent telemetry duplication.
     # disableLeaderElection: false
   # Configures the collector to collect logs and metrics from pods with specific annotations.
@@ -667,8 +667,8 @@ resources:
     cpu: 500m
     memory: 512Mi
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 1m
+    memory: 1Mi
 
 enableConfigChecksumAnnotation: true
 podAnnotations: {}
