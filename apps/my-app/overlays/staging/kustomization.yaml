@@ -6,7 +6,7 @@ resources:
   - frontend-svc.yaml
 images:
   - name: ghcr.io/traipoap/backend
-    newTag: 0.0.72
+    newTag: 0.0.76
     newName: ghcr.io/traipoap/backend
   - name: ghcr.io/traipoap/frontend
     newTag: 0.0.76
