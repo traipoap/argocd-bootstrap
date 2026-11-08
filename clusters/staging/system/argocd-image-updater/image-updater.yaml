@@ -28,6 +28,10 @@ spec:
     # Keep only ONE ImageUpdater CR per application - multiple CRs matching the
     # same app continuously overwrite each other (documented thrashing behavior).
     - namePattern: "my-app-staging"
+      # NOTE: frontend is no longer auto-bumped. Blue/green deployment pins
+      # its tags in apps/my-app/overlays/staging/frontend-{blue,green}.yaml
+      # (the kustomization `images:` entry for frontend was removed); the
+      # release slot is frontend-green — see PROGRESSIVE-DELIVERY.md.
       images:
         - alias: "backend"
           # The tag part of imageName is a SEMVER CONSTRAINT, not the current
@@ -37,11 +41,4 @@ spec:
           imageName: "ghcr.io/traipoap/backend:0.0.x"
           manifestTargets:
             kustomize:
-              # Must match the `name:` entry in the overlay kustomization's images list
               name: "ghcr.io/traipoap/backend"
-        - alias: "frontend"
-          # Semver constraint: track the 0.0.x patch series (see backend above).
-          imageName: "ghcr.io/traipoap/frontend:0.0.x"
-          manifestTargets:
-            kustomize:
-              name: "ghcr.io/traipoap/frontend"

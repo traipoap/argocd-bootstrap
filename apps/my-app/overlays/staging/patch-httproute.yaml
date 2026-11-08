@@ -1,3 +1,6 @@
+# NOTE: this patch keeps the FULL rules array on purpose. Kustomize applies
+# patches to CRDs (HTTPRoute) with JSON-merge semantics, where arrays are
+# replaced wholesale — a partial `rules` list would drop other rules.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -13,9 +16,17 @@ spec:
     - path:
         type: PathPrefix
         value: /
+    # Blue/green + canary split (Gateway API backendRef weights).
+    # Baseline: blue=100 / green=0. Change these with
+    # scripts/promote-frontend.sh — never kubectl-patch the live route:
+    # ArgoCD selfHeal reverts out-of-band changes.
     backendRefs:
-    - name: frontend-svc
+    - name: frontend-blue-svc
       port: 80
+      weight: 50
+    - name: frontend-green-svc
+      port: 80
+      weight: 50
 
   - matches:
     - path:
