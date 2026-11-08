@@ -27,10 +27,6 @@ spec:
         fsGroup: 10001
       imagePullSecrets:
         - name: github-registry
-      command:
-        - sh
-        - -c
-        - tail -f /var/log/nginx/access.log
       containers:
         - name: frontend
           image: ghcr.io/traipoap/frontend:0.0.76
