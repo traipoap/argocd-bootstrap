@@ -29,7 +29,7 @@ spec:
         - name: github-registry
       containers:
         - name: frontend
-          image: ghcr.io/traipoap/frontend:0.0.79
+          image: ghcr.io/traipoap/frontend:0.0.81
           ports:
             - name: http
               containerPort: 80
