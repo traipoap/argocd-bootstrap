@@ -5,13 +5,8 @@ resources:
   - frontend-blue.yaml
   - frontend-green.yaml
 images:
-  # Frontend is intentionally EXCLUDED: blue/green deployments pin their own
-  # tags (see PROGRESSIVE-DELIVERY.md). The kustomize images transformer
-  # matches by image NAME and would move BOTH colors at once, breaking the
-  # "blue stays on the last good release" invariant. Argo CD Image Updater
-  # therefore only auto-bumps the backend.
   - name: ghcr.io/traipoap/backend
-    newTag: 0.0.76
+    newTag: 0.0.80
     newName: ghcr.io/traipoap/backend
 patches:
   - path: patch-config.yaml
