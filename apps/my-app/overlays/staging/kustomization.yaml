@@ -6,7 +6,7 @@ resources:
   - frontend-green.yaml
 images:
   - name: ghcr.io/traipoap/backend
-    newTag: 0.0.80
+    newTag: 0.0.83
     newName: ghcr.io/traipoap/backend
 patches:
   - path: patch-config.yaml
