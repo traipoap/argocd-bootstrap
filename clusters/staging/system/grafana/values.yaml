@@ -498,8 +498,6 @@ resources:
   requests:
     cpu: 1m
     memory: 1Mi
-  limits:
-    memory: 512Mi
 
 ## Configure the GOMEMLIMIT environment variable.
 ## When enabled and resources.limits.memory is set, GOMEMLIMIT is injected
