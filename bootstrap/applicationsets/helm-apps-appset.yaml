@@ -12,10 +12,10 @@ spec:
         repoURL: 'https://github.com/traipoap/argocd-bootstrap'
         revision: HEAD
         directories:
-          - path: apps/*/overlays/*
-            # Kustomize apps are managed by business-applications;
-            # don't create Helm apps for them.
-            exclude: '^apps/my-app/'
+          # Helm-chart apps — add new ones here, e.g. apps/<new-app>/overlays/*
+          # (Kustomize apps like my-app are handled by business-applications,
+          # so keep them out of this pattern)
+          - path: apps/microservices-demo/overlays/*
   template:
     metadata:
       name: '{{path[1]}}-{{path[3]}}' # e.g. microservices-demo-staging
