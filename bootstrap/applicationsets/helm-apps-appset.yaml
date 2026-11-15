@@ -18,7 +18,7 @@ spec:
           - path: apps/microservices-demo/overlays/production
   template:
     metadata:
-      name: '{{path[1]}}' # e.g. microservices-demo-staging
+      name: 'microservices-demo' # e.g. microservices-demo-staging
       annotations:
         argocd.argoproj.io/sync-wave: "0"
     spec:
@@ -27,14 +27,14 @@ spec:
         repoURL: 'https://github.com/traipoap/argocd-bootstrap'
         targetRevision: HEAD
         # Directory containing Chart.yaml (exactly one chart in dir -> auto-detected).
-        path: apps/{{path[1]}}
+        path: apps/microservices-demo
         valueFiles:
           - apps/microservices-demo/overlays/production/values.yaml
         helm:
-          releaseName: '{{path[1]}}'
+          releaseName: 'microservices-demo'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: '{{path[1]}}'
+        namespace: 'microservices-demo'
       syncPolicy:
         automated:
           prune: true
