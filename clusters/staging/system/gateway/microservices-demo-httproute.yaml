@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: microservices-demo-httproute
+  namespace: argocd
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: app-gateway
+    namespace: istio-system
+  hostnames:
+  - "microservices-demo.traipoap.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - group: ''
+      kind: Service
+      name: frontend-external
+      port: 80
+      weight: 1

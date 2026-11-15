@@ -58,6 +58,14 @@ spec:
       namespaces:
         from: "All"
 
+  - name: http-microservices-demo
+    protocol: HTTP
+    port: 80
+    hostname: "microservices-demo.traipoap.com"
+    allowedRoutes:
+      namespaces:
+        from: "All"
+
   # - name: https
   #   protocol: HTTPS
   #   port: 443

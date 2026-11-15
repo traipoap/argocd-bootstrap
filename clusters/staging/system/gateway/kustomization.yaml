@@ -4,3 +4,4 @@ resources:
   - gateway.yaml
   - grafana-httproute.yaml
   - argocd-httproute.yaml
+  - microservices-demo-httproute.yaml
