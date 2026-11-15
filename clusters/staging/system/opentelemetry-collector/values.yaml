@@ -258,7 +258,7 @@ config:
     # (pod log path layout: /var/log/pods/<namespace>_<node>/<pod>_<uid>/<container>/*.log)
     filelog:
       include:
-        - /var/log/pods/staging_*/*/*.log
+        - /var/log/pods/*/*/*.log
       exclude:
         # Exclude collector logs to avoid loop
         - /var/log/pods/opentelemetry-collector_-*/*/*.log
