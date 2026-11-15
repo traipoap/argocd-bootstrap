@@ -18,7 +18,7 @@ spec:
           - path: apps/microservices-demo
   template:
     metadata:
-      name: 'microservices-demo' # e.g. microservices-demo-staging
+      name: 'microservices-demo' # e.g. microservices-demo
       annotations:
         argocd.argoproj.io/sync-wave: "0"
     spec:
@@ -31,7 +31,7 @@ spec:
         # versions resolve it as a sub-path of `path` and break resolution.
         path: apps/microservices-demo
         valueFiles:
-          - apps/microservices-demo/values.yaml
+          - values.yaml
         helm:
           releaseName: 'microservices-demo'
       destination:
