@@ -19,9 +19,9 @@ spec:
       labels:
         app: frontend
         color: blue
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "80"
+      # annotations:
+      #   prometheus.io/scrape: "true"
+      #   prometheus.io/port: "80"
     spec:
       securityContext:
         fsGroup: 10001
