@@ -23,10 +23,10 @@ spec:
     backendRefs:
     - name: frontend-blue-svc
       port: 80
-      weight: 100
+      weight: 0
     - name: frontend-green-svc
       port: 80
-      weight: 0
+      weight: 100
 
   - matches:
     - path:
