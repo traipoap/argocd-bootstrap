@@ -15,7 +15,7 @@ spec:
           # Helm-chart apps — add new ones here, e.g. apps/<new-app>/overlays/*
           # (Kustomize apps like my-app are handled by business-applications,
           # so keep them out of this pattern)
-          - path: apps/microservices-demo/overlays/prod
+          - path: apps/microservices-demo/overlays/production
   template:
     metadata:
       name: '{{path[1]}}' # e.g. microservices-demo-staging
@@ -29,7 +29,7 @@ spec:
         # Directory containing Chart.yaml (exactly one chart in dir -> auto-detected).
         path: apps/{{path[1]}}
         valueFiles:
-          - apps/{{path[1]}}/overlays/prod/values.yaml
+          - apps/{{path[1]}}/overlays/production/values.yaml
         helm:
           releaseName: '{{path[1]}}'
       destination:
