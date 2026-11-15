@@ -42,13 +42,3 @@ spec:
           manifestTargets:
             kustomize:
               name: "ghcr.io/traipoap/backend"
-
-        - alias: "frontend-green"
-          # The tag part of imageName is a SEMVER CONSTRAINT, not the current
-          # tag. A bare version (e.g. 0.0.69) means "only that exact version",
-          # which silently blocks all updates. 0.0.x = track all patches of the
-          # 0.0 series, skipping 0.1.0+/1.0.0+ automatically.
-          imageName: "ghcr.io/traipoap/frontend:0.0.x"
-          manifestTargets:
-            kustomize:
-              name: "ghcr.io/traipoap/frontend"
