@@ -29,7 +29,7 @@ spec:
         # Directory containing Chart.yaml (exactly one chart in dir -> auto-detected).
         path: apps/{{path[1]}}
         valueFiles:
-          - apps/{{path[1]}}/overlays/{{path[3]}}/values.yaml
+          - apps/{{path[1]}}/overlays/prod/values.yaml
         helm:
           releaseName: '{{path[1]}}'
       destination:
