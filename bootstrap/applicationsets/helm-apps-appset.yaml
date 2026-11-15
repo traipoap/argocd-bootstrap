@@ -31,7 +31,7 @@ spec:
         # versions resolve it as a sub-path of `path` and break resolution.
         path: apps/microservices-demo
         valueFiles:
-          - values.yaml
+          values.yaml
         helm:
           releaseName: 'microservices-demo'
       destination:
@@ -43,3 +43,4 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ServerSideApply=true-
