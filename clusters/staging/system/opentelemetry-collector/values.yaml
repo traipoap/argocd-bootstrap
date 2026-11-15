@@ -259,6 +259,7 @@ config:
     filelog:
       include:
         - /var/log/pods/staging_*/*/*.log
+        - /var/log/pods/microservices-demo_*/*/*.log
       exclude:
         # Exclude collector logs to avoid loop
         - /var/log/pods/opentelemetry-collector_-*/*/*.log
