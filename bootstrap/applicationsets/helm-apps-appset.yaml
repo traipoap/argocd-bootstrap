@@ -15,10 +15,10 @@ spec:
           # Helm-chart apps — add new ones here, e.g. apps/<new-app>/overlays/*
           # (Kustomize apps like my-app are handled by business-applications,
           # so keep them out of this pattern)
-          - path: apps/microservices-demo/overlays/*
+          - path: apps/microservices-demo/overlays/prod
   template:
     metadata:
-      name: '{{path[1]}}-{{path[3]}}' # e.g. microservices-demo-staging
+      name: '{{path[1]}}' # e.g. microservices-demo-staging
       annotations:
         argocd.argoproj.io/sync-wave: "0"
     spec:
@@ -34,7 +34,7 @@ spec:
           releaseName: '{{path[1]}}'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: '{{path[1]}}-{{path[3]}}'
+        namespace: '{{path[1]}}'
       syncPolicy:
         automated:
           prune: true
