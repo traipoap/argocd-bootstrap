@@ -1,0 +1,19 @@
+# microservices-demo — staging (values diff)
+# Only environment-specific differences live here; everything else comes
+# from the chart defaults (apps/microservices-demo/values.yaml).
+# Deployed by the business-helm-applications ApplicationSet.
+
+# Test environment: allow the load generator for load/chaos experiments.
+loadGenerator:
+  create: true
+
+# No GCP here — disable GCP ops integration; traces go to the in-cluster
+# OTel collector instead.
+googleCloudOperations:
+  profiler: false
+  tracing: false
+  metrics: false
+
+anotherOpentelemetryCollector:
+  enable: true
+  collectorAddr: "infra-opentelemetry-collector.opentelemetry-collector.svc.cluster.local"

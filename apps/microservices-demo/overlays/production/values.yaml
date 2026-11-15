@@ -1,0 +1,17 @@
+# microservices-demo — production (values diff)
+# Only environment-specific differences live here; everything else comes
+# from the chart defaults (apps/microservices-demo/values.yaml).
+# Deployed by the business-helm-applications ApplicationSet.
+
+# NEVER run the synthetic load generator against production.
+loadGenerator:
+  create: false
+
+googleCloudOperations:
+  profiler: false
+  tracing: false
+  metrics: false
+
+anotherOpentelemetryCollector:
+  enable: true
+  collectorAddr: "infra-opentelemetry-collector.opentelemetry-collector.svc.cluster.local"
