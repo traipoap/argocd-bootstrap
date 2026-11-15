@@ -23,7 +23,7 @@ server:
     size: 4Gi
     storageClass: "" # uses default storage class, change if needed
   # Data retention
-  retention: 7d
+  retention: 1d
 
   # Global settings
   global:
