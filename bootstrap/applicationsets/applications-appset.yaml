@@ -10,6 +10,10 @@ spec:
         revision: HEAD
         directories:
           - path: apps/*/overlays/*
+            # Helm-chart apps (e.g. microservices-demo) are managed by
+            # business-helm-applications — this kustomize appset must skip them,
+            # otherwise it creates failing apps (no kustomization.yaml there).
+            exclude: '^apps/microservices-demo/'
   template:
     metadata:
       name: '{{path[1]}}-{{path[3]}}' # ผลลัพธ์: my-app-production

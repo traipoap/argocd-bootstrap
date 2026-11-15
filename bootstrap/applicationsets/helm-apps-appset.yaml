@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: business-helm-applications
+  namespace: argocd
+  # Helm-chart apps: apps/<app>/ contains Chart.yaml + templates/, and
+  # apps/<app>/overlays/<env>/values.yaml holds the per-env values diff.
+  # (Kustomize apps like my-app are handled by business-applications.)
+spec:
+  generators:
+    - git:
+        repoURL: 'https://github.com/traipoap/argocd-bootstrap'
+        revision: HEAD
+        directories:
+          - path: apps/*/overlays/*
+            # Kustomize apps are managed by business-applications;
+            # don't create Helm apps for them.
+            exclude: '^apps/my-app/'
+  template:
+    metadata:
+      name: '{{path[1]}}-{{path[3]}}' # e.g. microservices-demo-staging
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/traipoap/argocd-bootstrap'
+        targetRevision: HEAD
+        # Directory containing Chart.yaml (exactly one chart in dir -> auto-detected).
+        path: apps/{{path[1]}}
+        valueFiles:
+          - apps/{{path[1]}}/overlays/{{path[3]}}/values.yaml
+        helm:
+          releaseName: '{{path[1]}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{path[1]}}-{{path[3]}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
