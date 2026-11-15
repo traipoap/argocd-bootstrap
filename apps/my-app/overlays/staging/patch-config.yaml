@@ -7,7 +7,7 @@ data:
   ALLOWED_HOSTS: "k3s-origin.traipoap.com,.traipoap.com"
 
   # Backend configuration
-  CORS_ORIGINS: "https://k3s-origin.traipoap.com,https://app.traipoap.com"
+  CORS_ORIGINS: "https://staging.traipoap.com,https://k3s-origin.traipoap.com,https://app.traipoap.com"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://infra-opentelemetry-collector.opentelemetry-collector.svc.cluster.local:4318"
   OTEL_SERVICE_NAME: "lumina-backend"
   OTEL_SERVICE_VERSION: "0.0.1"
