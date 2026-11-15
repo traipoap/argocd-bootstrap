@@ -15,7 +15,7 @@ spec:
           # Helm-chart apps — add new ones here, e.g. apps/<new-app>/overlays/*
           # (Kustomize apps like my-app are handled by business-applications,
           # so keep them out of this pattern)
-          - path: apps/microservices-demo/overlays/production
+          - path: apps/microservices-demo
   template:
     metadata:
       name: 'microservices-demo' # e.g. microservices-demo-staging
@@ -31,7 +31,7 @@ spec:
         # versions resolve it as a sub-path of `path` and break resolution.
         path: apps/microservices-demo
         valueFiles:
-          - apps/microservices-demo/overlays/production/values.yaml
+          - apps/microservices-demo/values.yaml
         helm:
           releaseName: 'microservices-demo'
       destination:
