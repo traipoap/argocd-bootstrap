@@ -26,11 +26,10 @@ spec:
       source:
         repoURL: 'https://github.com/traipoap/argocd-bootstrap'
         targetRevision: HEAD
-        # Directory containing Chart.yaml (exactly one chart in dir).
+        # Directory containing Chart.yaml (exactly one chart in dir ->
+        # auto-detected). Do NOT add a `chart:` field here: some ArgoCD
+        # versions resolve it as a sub-path of `path` and break resolution.
         path: apps/microservices-demo
-        # Explicit chart name (from Chart.yaml) so resolution is unambiguous
-        # across ArgoCD versions.
-        chart: onlineboutique
         valueFiles:
           - apps/microservices-demo/overlays/production/values.yaml
         helm:
