@@ -14,7 +14,7 @@ data:
       prefix: ghcr.io
       api_url: https://ghcr.io
       # Controller only reads secrets from its own namespace (argocd).
-      # Create it (outside of Git): kubectl -n argocd create secret docker-registry github-registry \
+      # Create it (outside of Git): kubectl -n argocd create secret docker-registry github-credentials \
       #   --docker-server=ghcr.io --docker-username=<gh-user> --docker-password=<GHCR_PAT>
       # (PAT scope: read:packages). Not needed if the ghcr.io/traipoap repos are public.
       # NOTE: must be `pullsecret:` (not `secret:`) because github-credentials is a
