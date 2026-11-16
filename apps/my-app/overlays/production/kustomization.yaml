@@ -11,4 +11,4 @@ images:
 patches:
   - path: patch-config.yaml
   - path: patch-httproute.yaml
-namespace: staging
+namespace: production
