@@ -4,7 +4,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-blue
+  name: frontend
   labels:
     app: frontend
     color: blue
@@ -75,7 +75,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-blue-svc
+  name: frontend-svc
   labels:
     app: frontend
     color: blue
