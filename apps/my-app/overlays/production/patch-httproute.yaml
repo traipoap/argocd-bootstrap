@@ -21,12 +21,9 @@ spec:
     # scripts/promote-frontend.sh — never kubectl-patch the live route:
     # ArgoCD selfHeal reverts out-of-band changes.
     backendRefs:
-    - name: frontend-blue-svc
+    - name: frontend-svc
       port: 80
       weight: 100
-    - name: frontend-green-svc
-      port: 80
-      weight: 0
 
   - matches:
     - path:

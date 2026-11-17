@@ -2,8 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
-  - frontend-blue.yaml
-  - frontend-green.yaml
+  - frontend.yaml
 images:
   - name: ghcr.io/traipoap/backend
     newTag: 0.0.90
