@@ -5,10 +5,10 @@ resources:
   - frontend.yaml
 images:
   - name: ghcr.io/traipoap/backend
-    newTag: 0.0.90
+    newTag: 0.0.92
     newName: ghcr.io/traipoap/backend
   - name: ghcr.io/traipoap/frontend
-    newTag: 0.0.91
+    newTag: 0.0.92
     newName: ghcr.io/traipoap/frontend
 patches:
   - path: patch-config.yaml
