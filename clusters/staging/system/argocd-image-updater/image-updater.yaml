@@ -27,7 +27,7 @@ spec:
     # from apps/my-app/overlays/staging, which deploys both backend and frontend.
     # Keep only ONE ImageUpdater CR per application - multiple CRs matching the
     # same app continuously overwrite each other (documented thrashing behavior).
-    - namePattern: "my-app-staging"
+    - namePattern: "my-app"
       # NOTE: frontend is no longer auto-bumped. Blue/green deployment pins
       # its tags in apps/my-app/overlays/staging/frontend-{blue,green}.yaml
       # (the kustomization `images:` entry for frontend was removed); the
