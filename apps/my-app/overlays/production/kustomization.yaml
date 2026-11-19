@@ -8,7 +8,7 @@ images:
     newTag: 0.0.108
     newName: ghcr.io/traipoap/backend
   - name: ghcr.io/traipoap/frontend
-    newTag: 0.0.108
+    newTag: 0.0.109
     newName: ghcr.io/traipoap/frontend
 patches:
   - path: patch-config.yaml
