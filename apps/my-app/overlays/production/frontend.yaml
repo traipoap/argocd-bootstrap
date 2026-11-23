@@ -21,7 +21,7 @@ spec:
         color: blue
       # annotations:
       #   prometheus.io/scrape: "true"
-      #   prometheus.io/port: "80"
+      #   prometheus.io/port: "4321"
     spec:
       securityContext:
         fsGroup: 10001
@@ -32,7 +32,7 @@ spec:
           image: ghcr.io/traipoap/frontend:0.0.90
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 4321
               protocol: TCP
           envFrom:
             - configMapRef:
@@ -82,8 +82,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 4321
+      targetPort: 4321
       protocol: TCP
       name: http
   selector:
