@@ -22,7 +22,7 @@ spec:
     # ArgoCD selfHeal reverts out-of-band changes.
     backendRefs:
     - name: frontend-svc
-      port: 4321
+      port: 80
       weight: 100
 
   - matches:
